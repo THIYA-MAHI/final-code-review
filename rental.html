@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inline Table with Divs</title>
+  <style>
+    body {
+      font-family: "Arial", sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    #table-container {
+      width: 80%;
+      margin: 20px auto;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fff;
+      overflow: hidden;
+    }
+
+    .table-header,
+    .table-row {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .table-header {
+      background-color: #eee;
+      font-weight: bold;
+    }
+
+    .table-cell {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      border-right: 1px solid #ddd;
+    }
+
+    .table-cell:last-child {
+      border-right: none;
+    }
+
+    input,
+    select {
+      width: 90%;
+      padding: 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .add-btn {
+      display: block;
+      margin: 20px auto;
+      background-color: #4caf50;
+      color: white;
+    }
+
+    .delete-btn,
+    .save-btn {
+      background-color: #f44336;
+      color: white;
+    }
+
+    .save-btn {
+      background-color: #28d42d;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <h2 id="dvd-title"></h2>
+
+  <div id="table-container">
+    <div class="table-header">
+      <div class="table-cell">Member Id</div>
+      <div class="table-cell">Rental Date</div>
+      <div class="table-cell">Months</div>
+      <div class="table-cell">Actions</div>
+    </div>
+  </div>
+
+  <button id="add-row-btn" class="add-btn">Add Row</button>
+
+  <script>
+    const title = document.getElementById("dvd-title");
+    const members = JSON.parse(localStorage.getItem("members")) || [];
+    const DVDs = JSON.parse(localStorage.getItem("DVDs")) || [];
+    const RentalDVDs = JSON.parse(localStorage.getItem("rentalDVDs")) || [];
+
+    const addRowBtn = document.getElementById("add-row-btn");
+    const tableContainer = document.getElementById("table-container");
+
+    const loadeddvdId = getQueryParam("dvdId");
+    const loadeddvd = DVDs.find((p) => p.dvdId == loadeddvdId);
+    title.innerHTML = loadeddvd.dvdTitle;
+    showTable();
+
+    addRowBtn.addEventListener("click", () => {
+      const newRow = document.createElement("div");
+      newRow.classList.add("table-row");
+
+      newRow.innerHTML = `
+            <div class="table-cell">
+            </div>
+            <div class="table-cell">
+                <input type="date" id="rental-date"/>
+            </div>
+            <div class="table-cell">
+                <input type="number" placeholder="0" id="rental-month" />
+            </div>
+            <div class="table-cell">
+                <button class="save-btn">Save</button>
+            </div>
+        `;
+
+      let selectTag = document.createElement("select");
+      selectTag.classList.add("drop-down");
+
+      members.forEach((member) => {
+        let option = document.createElement("option");
+        option.value = member.id;
+        option.innerHTML = member.id;
+        selectTag.appendChild(option);
+      });
+
+      newRow.querySelector(".table-cell").appendChild(selectTag);
+      tableContainer.appendChild(newRow);
+
+      newRow.querySelector(".save-btn").addEventListener("click", () => {
+        saveRow(newRow);
+      });
+    });
+
+    function saveRow(row) {
+      let memberId = row.querySelector(".drop-down").value;
+      let rentalDate = row.querySelector("#rental-date").value;
+      let rentalMonth = row.querySelector("#rental-month").value;
+
+      const newRental = {
+        dvdId: loadeddvdId,
+        memberID: memberId,
+        rentalDate: rentalDate,
+        rentalMonth: rentalMonth,
+      };
+
+      RentalDVDs.push(newRental);
+      localStorage.setItem("rentalDVDs", JSON.stringify(RentalDVDs));
+      window.location.reload();
+    }
+
+    function showTable() {
+      RentalDVDs.forEach((rental) => {
+        if (rental.dvdId == loadeddvdId) {
+          const newRow = document.createElement("div");
+          newRow.classList.add("table-row");
+
+          newRow.innerHTML = `
+            <div class="table-cell">
+            </div>
+            <div class="table-cell">
+                <input type="date" id="rental-date" value="${rental.rentalDate}" readonly/>
+            </div>
+            <div class="table-cell">
+                <input type="number" placeholder="0" id="rental-month" value="${rental.rentalMonth}" readonly />
+            </div>
+            <div class="table-cell">
+                <button class="delete-btn">Delete</button>
+            </div>
+        `;
+
+          let selectTag = document.createElement("select");
+          selectTag.classList.add("drop-down");
+
+          let option = document.createElement("option");
+          option.value = rental.memberID;
+          option.setAttribute("readonly", "true");
+          option.innerHTML = rental.memberID;
+          selectTag.appendChild(option);
+          newRow.querySelector(".table-cell").appendChild(selectTag);
+          tableContainer.appendChild(newRow);
+
+          newRow.querySelector(".delete-btn").addEventListener("click", () => {
+            deleteRow(rental);
+          });
+        }
+      });
+    }
+
+    function deleteRow(rental) {
+      const index = RentalDVDs.findIndex(
+        (e) =>
+          e.dvdId === rental.dvdId &&
+          e.memberID === rental.memberID &&
+          e.rentalDate === rental.rentalDate &&
+          e.rentalMonth === rental.rentalMonth
+      );
+
+      if (index !== -1) {
+        RentalDVDs.splice(index, 1);
+        localStorage.setItem("rentalDVDs", JSON.stringify(RentalDVDs));
+        window.location.reload();
+      }
+    }
+
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>member</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+    }
+
+    #table-container {
+        width: 80%;
+        margin: 20px auto;
+    }
+
+    #member-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    #member-table th,
+    #member-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        color: #333;
+    }
+
+    #member-table th {
+        background-color: #484b48;
+        color: white;
+        font-weight: bold;
+    }
+
+    #member-table tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    #member-table img {
+        border-radius: 50%;
+        height: 50px;
+        width: 50px;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+
+    .modal-content {
+        background-color: #fff;
+        margin: 8% auto;
+        padding: 15px;
+        border: 1px solid #888;
+        width: 35%;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .close-btn {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close-btn:hover,
+    .close-btn:focus {
+        color: #000;
+        text-decoration: none;
+    }
+
+    .modal-title {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #333;
+    }
+
+    label {
+        display: block;
+        font-size: 16px;
+        color: #555;
+        margin: 10px 0 5px;
+    }
+
+    input[type="text"],
+    input[type="date"] {
+        width: 90%;
+        padding: 8px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    input[type="submit"] {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+    input[type="submit"]:hover {
+        background-color: #45a049;
+    }
+
+    #openModalBtn {
+        background-color: #4CAF50;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+        margin: 20px 0;
+    }
+
+    #openModalBtn:hover {
+        background-color: #45a049;
+    }
+</style>
+
+<body>
+    <div id="table-container">
+        <table id="member-table">
+            <thead>
+                <tr>
+                    <th>Member ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>DOB</th>
+                    <th>Profile</th>
+                </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
+    </div>
+    <!-- modal -->
+
+
+    <button id="openModalBtn">Open Modal</button>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 class="modal-title">ADD CUSTOMER</h2>
+            <div class="modal-body">
+                <form action="">
+                    <label for="id">Member id</label>
+                    <input type="text" id="id" required><br>
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" required><br>
+                    <label for="lastName">Last Name</label>
+                    <input type="text" id="lastName" required><br>
+                    <label for="dateOfBirth">Date of Birth</label>
+                    <input type="date" id="dateOfBirth" required><br>
+                    <label for="image">Profile</label>
+                    <input type="text" placeholder="your image path" id="image"><br>
+                    <input type="submit" value="submit" id="submit">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // members = localstorage table name(key)
+        let tableBody = document.querySelector("#member-table tbody");
+        let membersList = JSON.parse(localStorage.getItem("members")) || [
+            {
+                "id": "M001",
+                "firstName": "John",
+                "lastName": "Doe",
+                "dateOfBirth": "1990-05-15",
+                "image": "member1.jpg"
+            },
+            {
+                "id": "M002",
+                "firstName": "Jane",
+                "lastName": "Smith",
+                "dateOfBirth": "1985-08-22",
+                "image": "member1.jpg"
+            },
+            {
+                "id": "M003",
+                "firstName": "Michael",
+                "lastName": "Johnson",
+                "dateOfBirth": "1992-11-30",
+                "image": "member1.jpg"
+            },
+            {
+                "id": "M004",
+                "firstName": "Emily",
+                "lastName": "Williams",
+                "dateOfBirth": "1995-04-10",
+                "image": "member1.jpg"
+            },
+            {
+                "id": "M005",
+                "firstName": "Nelson",
+                "lastName": "Mandella",
+                "dateOfBirth": "1965-04-17",
+                "image": "member1.jpg"
+            }
+        ];
+        membersList.forEach(member => {
+            let newRow = document.createElement("tr");
+            newRow.innerHTML = `
+          <td>${member.id}</td>
+          <td>${member.firstName}</td>
+          <td>${member.lastName}</td>
+          <td>${member.dateOfBirth}</td>
+          <td><img src="${member.image}" width="100px"></td>
+          `;
+            tableBody.appendChild(newRow);
+        });
+
+        // modal-------------------------------------------
+
+        const modal = document.getElementById("myModal");
+        const openModalBtn = document.getElementById("openModalBtn");
+        const closeBtn = document.querySelector(".close-btn");
+
+        // add new member when click submit button 
+        const AddMember = document.getElementById("submit");
+        AddMember.addEventListener("click", (event) => {
+            event.preventDefault();
+            let Memberid = document.getElementById("id").value;
+            let FirstName = document.getElementById("firstName").value;
+            let LastName = document.getElementById("lastName").value;
+            let DOB = document.getElementById("dateOfBirth").value;
+            let Image = document.getElementById("image").value;
+
+            // added new member to asign in memberList
+            const newMember = {
+                "id": Memberid,
+                "firstName": FirstName,
+                "lastName": LastName,
+                "dateOfBirth": DOB,
+                "image": Image
+            };
+            membersList.push(newMember);
+            localStorage.setItem("members", JSON.stringify(membersList));
+            modal.style.display = "none";
+            location.reload();
+
+
+        });
+
+
+
+        openModalBtn.addEventListener("click", () => {
+            modal.style.display = "block";
+        });
+
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+    </script>
+</body>
+
+</html>
